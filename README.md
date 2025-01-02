@@ -79,14 +79,6 @@ python main.py
 
 ---
 
-## 🎯 **To-Do List**
-
-- Optimize hyperparameters for better performance.
-- Add support for colored image classification.
-- Deploy the model as a web application.
-
----
-
 ## 💬 **Feedback & Contributions**
 
 Contributions are always welcome!
