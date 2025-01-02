@@ -1,5 +1,5 @@
 # 🖋️ **Handwritten Digit Classifier**  
-This project is a **Machine Learning model** developed in Python 🐍 using **TensorFlow/Keras**, **Matplotlib**, and **NumPy**.  
+This project is a **Machine Learning model** developed in Python using **TensorFlow/Keras**, **Matplotlib**, and **NumPy**.  
 
 The model can **classify handwritten digits (0–9)** from grayscale images and predict results with an impressive **accuracy of 96.83%**. It also supports visualization of training metrics and predictions for easy analysis.  
 
@@ -18,11 +18,11 @@ predict_digit('samples/digit2.png')  # Predicts second sample
 predict_digit('samples/digit3.png')  # Predicts third sample
 ```
 
-| Input Image                        | Prediction |
-|------------------------------------|-----------|
-| ![digit1](samples/digit1.png)      | **3** ✔️ |
-| ![digit2](samples/digit2.png)      | **8** ✔️ |
-| ![digit3](samples/digit3.png)      | **0** ✔️ |
+| Input Image                                      | Prediction |
+|--------------------------------------------------|------------|
+| <img src="samples/digit1.png" width="100">       | **3** ✔️   |
+| <img src="samples/digit2.png" width="100">       | **8** ✔️   |
+| <img src="samples/digit3.png" width="100">       | **0** ✔️   |
 
 ---
 
@@ -96,4 +96,4 @@ Contributions are always welcome!
 
 ---
 
-### ⭐ **If you find this project helpful, consider giving it a star!** ⭐
+### **If you find this project helpful, consider giving it a star!** ⭐
