@@ -1,34 +1,62 @@
 import tensorflow as tf
+from tensorflow.keras import layers, models
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.utils import to_categorical
 import numpy as np
+import joblib
 
-# Load MNIST dataset
-mnist = tf.keras.datasets.mnist
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-x_train, x_test = x_train / 255.0, x_test / 255.0  # Normalize data
+def prepare_data():
+    # Load and preprocess MNIST dataset
+    (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+    
+    # Normalize and reshape images
+    train_images = train_images.reshape((60000, 28, 28, 1)) / 255.0
+    test_images = test_images.reshape((10000, 28, 28, 1)) / 255.0
+    
+    # One-hot encode the labels
+    train_labels = to_categorical(train_labels)
+    test_labels = to_categorical(test_labels)
+    
+    return train_images, train_labels, test_images, test_labels
 
-# Reshape for CNN (Add channel dimension)
-x_train = x_train.reshape(-1, 28, 28, 1)
-x_test = x_test.reshape(-1, 28, 28, 1)
+def create_model():
+    model = models.Sequential([
+        layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.Flatten(),
+        layers.Dense(64, activation='relu'),
+        layers.Dense(10, activation='softmax')
+    ])
+    
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    
+    return model
 
-# Define CNN model
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
-    tf.keras.layers.MaxPooling2D(2, 2),
-    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-    tf.keras.layers.MaxPooling2D(2, 2),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(10, activation='softmax')  # Softmax for classification
-])
+def train_and_save_model():
+    # Prepare data
+    train_images, train_labels, test_images, test_labels = prepare_data()
+    
+    # Create and train model
+    model = create_model()
+    history = model.fit(train_images, train_labels, 
+                        epochs=10, 
+                        validation_split=0.2, 
+                        batch_size=64)
+    
+    # Evaluate model
+    test_loss, test_accuracy = model.evaluate(test_images, test_labels)
+    print(f'Test accuracy: {test_accuracy * 100:.2f}%')
+    
+    # Save the model
+    model.save('mnist_classifier.h5')
+    
+    return model, history
 
-model.compile(optimizer='adam',
-              loss='sparse_categorical_crossentropy',
-              metrics=['accuracy'])
-
-# Train model
-model.fit(x_train, y_train, epochs=5, validation_data=(x_test, y_test))
-
-# Save trained model
-model.save("cnn_digit_classifier.h5")
-print("CNN model saved successfully!")
+# Run training and save model
+if __name__ == '__main__':
+    model, history = train_and_save_model()
