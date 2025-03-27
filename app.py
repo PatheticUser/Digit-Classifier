@@ -30,10 +30,10 @@ def predict_digit(model, image_array):
     return predicted_class, confidence
 
 def main():
-    # Set page config with custom colors
+    # Set page config with custom favicon and title
     st.set_page_config(
-        page_title="Digit Classifier",
-        page_icon="🔢",
+        page_title="Digit Recognizer",
+        page_icon="https://i.imgur.com/6NvUVst.png",
         layout="centered"
     )
     
@@ -64,7 +64,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # Title
-    st.title("MNIST Digit Classifier")
+    st.title("Digit Recognizer")
     
     # Load pre-trained model
     model = load_model()
