@@ -5,27 +5,6 @@ The model can **classify handwritten digits (0–9)** from grayscale images and 
 
 ---
 
-## 📸 **Demo Preview**  
-
-Test the classifier with preloaded sample images in the repository:  
-
-```python
-from predict import predict_digit
-
-# Predict sample digits
-predict_digit('samples/digit1.png')  # Predicts first sample
-predict_digit('samples/digit2.png')  # Predicts second sample
-predict_digit('samples/digit3.png')  # Predicts third sample
-```
-
-| Input Image                                      | Prediction |
-|--------------------------------------------------|------------|
-| <img src="samples/digit1.png" width="100">       | **3** ✔️   |
-| <img src="samples/digit2.png" width="100">       | **8** ✔️   |
-| <img src="samples/digit3.png" width="100">       | **0** ✔️   |
-
----
-
 ## 🛠️ **Key Features**  
 
 - **Digit Classification** – Recognizes digits (0–9) from images.  
