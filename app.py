@@ -1,60 +1,46 @@
 import streamlit as st
-import numpy as np
 import tensorflow as tf
+import numpy as np
 import cv2
-import matplotlib.pyplot as plt
+from PIL import Image
 
-# Load and cache the trained model to improve efficiency
-@st.cache_resource
-def load_model():
-    mnist = tf.keras.datasets.mnist
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    x_train, x_test = x_train / 255.0, x_test / 255.0  # Normalize data
+# Load trained CNN model
+model = tf.keras.models.load_model("cnn_digit_classifier.h5")
 
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Flatten(input_shape=(28, 28)),
-        tf.keras.layers.Dense(512, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(10, activation='softmax')
-    ])
-    model.compile(optimizer='adam',
-                  loss='sparse_categorical_crossentropy',
-                  metrics=['accuracy'])
-    
-    model.fit(x_train, y_train, epochs=5, verbose=0)  # Train without console logs
-    return model
+# UI customization
+st.set_page_config(page_title="Digit Classifier", page_icon="🔢", layout="centered")
 
-model = load_model()
+# Custom CSS for UI (Minimal White, Yellow, Black Theme)
+st.markdown("""
+    <style>
+        body {background-color: white; color: black;}
+        .stApp { background-color: white; }
+        .stButton>button { background-color: black; color: white; border-radius: 5px; }
+        .stFileUploader { background-color: #F7C200; }
+    </style>
+""", unsafe_allow_html=True)
 
-# Function to preprocess and classify the digit
-def classify_digit(image):
-    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
-    img = cv2.resize(img, (28, 28))  # Resize to MNIST format
-    img = img / 255.0  # Normalize pixel values
-    img = img.reshape(1, 28, 28)  # Reshape for model input
-    
-    prediction = model.predict(img)[0]
-    return prediction
+st.title("🔢 Digit Classifier (CNN Model)")
+st.markdown("### Upload a hand-written digit image (28x28 pixels)")
 
-# Streamlit UI
-st.title("🖌️ Handwritten Digit Classifier")
-st.write("Upload an image of a digit (0-9) to classify it.")
+uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
 
-uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+if uploaded_file is not None:
+    # Convert to grayscale and resize
+    img = Image.open(uploaded_file).convert('L')
+    img = img.resize((28, 28))
+    img_array = np.array(img) / 255.0
+    img_array = img_array.reshape(1, 28, 28, 1)  # CNN expects 4D input
 
-if uploaded_file:
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)  # Read image
+    # Show Image with fixed size
+    st.image(img, caption="Uploaded Image", width=200)
 
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    # Predict
+    prediction = model.predict(img_array)[0]
+    predicted_digit = np.argmax(prediction)
 
-    if st.button("Classify Digit"):
-        prediction = classify_digit(image)
-        
-        # Display the results
-        st.subheader("🔢 Prediction")
-        predicted_digit = np.argmax(prediction)
-        st.write(f"**Predicted Digit:** {predicted_digit}")
-        
-        # Show prediction confidence
-        st.bar_chart(prediction)
+    # Display results
+    st.markdown(f"### **Predicted Digit: `{predicted_digit}`**")
+
+    # Show confidence scores
+    st.bar_chart(prediction)
