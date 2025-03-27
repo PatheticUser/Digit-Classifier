@@ -45,94 +45,72 @@ def predict_digit(model, image_array):
 
 
 def main():
-    # Set page config with custom favicon and title
+    # Set page config with original favicon and title
     st.set_page_config(
-        page_title="MNIST Digit Recognizer",
-        page_icon="🔢",
-        layout="wide",
-        initial_sidebar_state="collapsed",
+        page_title="Digit Recognizer",
+        page_icon="https://i.imgur.com/6NvUVst.png",
+        layout="centered",
     )
 
-    # Custom CSS for advanced styling
+    # Minimal custom CSS
     st.markdown(
         """
     <style>
-    /* Body and container styles */
     body {
-        background-color: #f4f4f4;
-        color: #333;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #ffffff;
+        color: #000000;
+        font-family: Arial, sans-serif;
     }
     
-    /* Header styles */
-    .stMarkdown h1 {
-        color: #2c3e50;
-        text-align: center;
-        font-weight: 600;
-        margin-bottom: 30px;
-        background: linear-gradient(90deg, #3498db, #2980b9);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+    .stApp {
+        max-width: 800px;
+        margin: 0 auto;
     }
     
-    /* Card-like container for file uploader and prediction */
-    .stContainer {
-        background-color: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    
-    /* Button styles */
     .stButton>button {
-        background-color: #3498db;
-        color: white;
-        border: none;
+        background-color: #FFD700;
+        color: black;
+        border: 2px solid black;
         padding: 10px 20px;
         border-radius: 5px;
         transition: all 0.3s ease;
-        font-weight: 600;
-        text-transform: uppercase;
+        font-weight: bold;
     }
     
     .stButton>button:hover {
-        background-color: #2980b9;
+        background-color: black;
+        color: #FFD700;
         transform: scale(1.05);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
     
-    /* Metric card styles */
-    .stMetric {
-        background-color: #ecf0f1;
-        border-radius: 10px;
+    .stFileUploader div[data-testid="stFileUploadDropzone"] {
+        border: 2px dashed #FFD700;
+        background-color: #FFFAF0;
+    }
+    
+    .stContainer, .stMetric {
+        background-color: #F5F5F5;
+        border: 1px solid #FFD700;
+        border-radius: 5px;
         padding: 15px;
-        text-align: center;
-    }
-    
-    .stMetric > div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        margin-bottom: 15px;
     }
     
     .stMetric div:first-child {
-        color: #7f8c8d;
-        margin-bottom: 5px;
+        color: #666;
     }
     
     .stMetric div:last-child {
-        font-size: 1.5em;
+        color: black;
         font-weight: bold;
-        color: #2c3e50;
     }
     </style>
     """,
         unsafe_allow_html=True,
     )
 
-    # Title with gradient
-    st.markdown("<h1>MNIST Digit Recognizer</h1>", unsafe_allow_html=True)
+    # Original title
+    st.title("Digit Recognizer")
 
     # Load pre-trained model
     model = load_model()
@@ -143,77 +121,57 @@ def main():
         )
         return
 
-    # Create two columns for layout
-    col1, col2 = st.columns([1, 1])
+    # File uploader
+    uploaded_file = st.file_uploader(
+        "Upload a handwritten digit image",
+        type=["png", "jpg", "jpeg"],
+        help="Upload a clear image of a handwritten digit",
+    )
 
-    with col1:
-        st.markdown('<div class="stContainer">', unsafe_allow_html=True)
+    if uploaded_file is not None:
+        # Display the uploaded image
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", width=300)
 
-        # File uploader with custom styling
-        uploaded_file = st.file_uploader(
-            "Upload a handwritten digit image",
-            type=["png", "jpg", "jpeg"],
-            help="Upload a clear, high-contrast image of a handwritten digit",
-        )
+        # Prediction button
+        if st.button("Predict Digit"):
+            # Preprocess and predict
+            processed_image = preprocess_image(image)
+            predicted_class, confidence = predict_digit(model, processed_image)
 
-        if uploaded_file is not None:
-            # Display the uploaded image
-            image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", width=300)
+            if predicted_class is not None:
+                # Display metrics
+                col1, col2 = st.columns(2)
 
-            # Prediction button
-            if st.button("Predict Digit"):
-                # Preprocess and predict
-                processed_image = preprocess_image(image)
-                predicted_class, confidence = predict_digit(model, processed_image)
+                with col1:
+                    st.metric(label="Predicted Digit", value=predicted_class)
 
-                if predicted_class is not None:
-                    # Display metrics in a visually appealing way
-                    st.markdown("### Prediction Results")
+                with col2:
+                    st.metric(label="Confidence", value=f"{confidence:.2f}%")
 
-                    col_pred, col_conf = st.columns(2)
-                    with col_pred:
-                        st.metric(label="Predicted Digit", value=predicted_class)
-
-                    with col_conf:
-                        st.metric(label="Confidence", value=f"{confidence:.2f}%")
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    with col2:
-        # Predictions visualization
-        if uploaded_file is not None:
-            st.markdown('<div class="stContainer">', unsafe_allow_html=True)
-
-            st.markdown("### Prediction Probabilities")
-
-            # Only show probability graph if a prediction was made
-            if "processed_image" in locals():
+                # Predictions visualization
+                st.subheader("Prediction Probabilities")
                 predictions = model.predict(processed_image)[0]
 
-                # Create a more visually appealing matplotlib figure
-                plt.figure(figsize=(8, 4), facecolor="#ecf0f1")
-                plt.bar(range(10), predictions, color="#3498db", alpha=0.7)
-                plt.title(
-                    "Digit Prediction Probabilities", fontsize=15, color="#2c3e50"
-                )
-                plt.xlabel("Digits", fontsize=12)
-                plt.ylabel("Probability", fontsize=12)
+                # Create matplotlib figure
+                plt.figure(figsize=(8, 4), facecolor="#F5F5F5")
+                plt.bar(range(10), predictions, color="#FFD700", edgecolor="black")
+                plt.title("Digit Prediction Probabilities", fontsize=12)
+                plt.xlabel("Digits")
+                plt.ylabel("Probability")
                 plt.xticks(range(10))
                 plt.grid(axis="y", linestyle="--", alpha=0.7)
 
-                # Save plot to a buffer to improve rendering
+                # Save plot to a buffer
                 buf = io.BytesIO()
                 plt.savefig(
-                    buf, format="png", bbox_inches="tight", dpi=300, facecolor="#ecf0f1"
+                    buf, format="png", bbox_inches="tight", dpi=300, facecolor="#F5F5F5"
                 )
                 buf.seek(0)
 
                 # Display the plot
                 st.image(buf)
                 plt.close()
-
-            st.markdown("</div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
