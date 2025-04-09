@@ -67,4 +67,4 @@ Contributions are always welcome!
 
 ---
 
-### **If you find this project helpful, consider giving it a star!** ⭐
+If this project helped you, please consider giving it a **star** on GitHub, it motivates me to improve and share more cool stuff!> Click on the 🌟 button at the top right of the repo. It takes 2 seconds and helps a lot!
